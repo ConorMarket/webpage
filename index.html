@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>What's the code for:</title>
+  <style>
+    :root{
+      /* Light blue theme */
+      --bg:#f6fbff;           /* page background */
+      --fg:#0f172a;           /* text */
+      --muted:#43607f;        /* secondary text */
+      --ui:#cfe3ff;           /* borders */
+      --ui2:#eaf2ff;          /* panels */
+      --accent:#3b82f6;       /* blue */
+      --accent-600:#2563eb;   /* darker blue */
+      --ok:#16a34a;           /* green */
+      --bad:#dc2626;          /* red */
+      --gold:#f59e0b;         /* amber glow */
+      --gold-2:#fbbf24;       /* lighter amber */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--fg)}
+
+    header{position:relative;display:flex;align-items:center;justify-content:center;padding:18px;border-bottom:1px solid var(--ui);background:linear-gradient(180deg,#f2f8ff, transparent)}
+    h1{margin:0;text-align:center;font-weight:800;letter-spacing:.3px;font-size:clamp(1.6rem, 3.6vw, 2.4rem);color:#0b2450}
+    #score{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-variant-numeric:tabular-nums;color:#0f172a;background:var(--ui2);border:1px solid var(--ui);padding:8px 12px;border-radius:12px}
+    #score label{opacity:.75;margin-right:6px}
+
+    main{max-width:940px;margin:0 auto;padding:16px}
+    .prompt{border:1px solid var(--ui);background:var(--ui2);border-radius:14px;padding:22px;margin:22px 0 12px;display:flex;align-items:center;justify-content:center;min-height:104px;font-size:clamp(1.05rem, 2.8vw, 1.5rem);text-align:center;transition:box-shadow .18s ease, border-color .18s ease}
+    .prompt.ok{border-color:#88e9a1; box-shadow:0 0 0 3px #bbf7d06e inset}
+    .prompt.bad{border-color:#fecaca; box-shadow:0 0 0 3px #fecaca7a inset}
+
+    .big-status{display:flex;align-items:center;justify-content:center;min-height:64px;margin:6px 0 20px;border-radius:14px;font-weight:900;letter-spacing:.6px;font-size:clamp(1.2rem, 4.2vw, 1.8rem);border:1px solid var(--ui);background:white}
+    .big-status.ok{color:#064e3b;border-color:#86efac;background:#e9fbe9}
+    .big-status.bad{color:#7f1d1d;border-color:#fecaca;background:#fee2e2}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(92px, 1fr));gap:14px}
+    button.code{appearance:none;border:1px solid var(--ui);background:white;border-radius:14px;padding:16px 12px;font-weight:900;letter-spacing:.5px;cursor:pointer;color:#0f172a;transition:transform .06s ease, box-shadow .16s ease, border-color .16s ease, background .16s ease}
+
+    /* Synchronized golden glow */
+    @keyframes goldGlow{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 3px rgba(245,158,11,.3), 0 12px 30px rgba(245,158,11,.28); border-color: var(--gold)}}
+    .syncGlow{animation: goldGlow 3.2s ease-in-out infinite}
+
+    button.code:hover, button.code:focus-visible{outline:none;border-color:var(--accent);background:#f0f6ff;box-shadow:0 0 0 3px rgba(59,130,246,.25), 0 10px 24px rgba(59,130,246,.22)}
+    button.code:active{transform:translateY(1px)}
+    button.code[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none;animation:none}
+    button.code.wrong{animation:blink .25s step-start 3}
+    @keyframes blink{50%{background:#fee2e2;border-color:#fecaca}}
+
+    .bottom{display:flex;justify-content:space-between;align-items:center;margin-top:16px;color:var(--muted);font-size:14px}
+    .btn-reset{background:white;border:1px solid var(--ui);border-radius:10px;padding:9px 12px;cursor:pointer}
+    .btn-reset:hover{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>What's the code for:</h1>
+    <div id="score" aria-live="polite"><label>TrustPilot score</label><strong>0</strong>/<span id="total">0</span></div>
+  </header>
+
+  <main>
+    <div class="prompt" id="prompt">Loading…</div>
+    <div id="bigStatus" class="big-status" aria-live="polite"></div>
+
+    <div class="grid" id="codes"></div>
+
+    <div class="bottom">
+      <button id="reset" class="btn-reset">Reset (R)</button>
+      <div id="progress" aria-hidden="true"></div>
+    </div>
+  </main>
+
+  <script>
+  (function(){
+    'use strict';
+    // Data
+    const PAIRS = [
+      { code: 'AVC', name: 'AVC' },
+      { code: 'GPS', name: 'Group Salary Protection Scheme' },
+      { code: 'FOR', name: 'Foursight Savings Plan' },
+      { code: 'RBP', name: 'Risk Benefit' },
+      { code: 'FEE', name: 'Fee collection' },
+      { code: 'GLS', name: 'Group Life Scheme' },
+      { code: 'RML', name: 'Retired Members Life Cover Policy' },
+      { code: 'PEN', name: 'Pension' },
+      { code: 'BON', name: 'Bond' },
+      { code: 'MDS', name: 'Cornmarket Tax Return Service' },
+      { code: 'MOR', name: 'Mortgage' },
+      { code: 'PRS', name: 'PRSA' },
+      { code: 'MEN', name: 'Standard Mentor' },
+      { code: 'PIP', name: 'Personal Investment Plan' },
+      { code: 'PRI', name: 'Professional Indemnity' },
+      { code: 'SSI', name: 'Special Savings Incentive a/c' },
+      { code: 'SUS', name: 'Suspense' },
+      { code: 'MAG', name: 'Magister' },
+      { code: 'BNK', name: 'Bankline' },
+      { code: 'CPC', name: 'Credit Protection Insurance' }
+    ];
+
+    const qs=(s,r=document)=>r.querySelector(s);
+    const shuffle=a=>a.map(x=>({k:Math.random(),x})).sort((a,b)=>a.k-b.k).map(o=>o.x);
+
+    const state = { order:[], idx:0, score:0 };
+
+    const codesEl = qs('#codes');
+    const promptEl = qs('#prompt');
+    const scoreEl = qs('#score strong');
+    const totalEl = qs('#total');
+    const bigStatus = qs('#bigStatus');
+
+    function reset(){
+      state.order = shuffle(PAIRS.slice());  // random product sequence
+      state.idx = 0; state.score = 0;
+      totalEl.textContent = state.order.length;
+      scoreEl.textContent = 0;
+      renderCodesSorted();
+      showCurrent();
+      bigStatus.textContent = '';
+      bigStatus.className = 'big-status';
+    }
+
+    function renderCodesSorted(){
+      // Codes A→Z with synchronized golden glow
+      codesEl.innerHTML='';
+      const list = [...PAIRS].sort((a,b)=> a.code.localeCompare(b.code));
+      list.forEach(item=>{
+        const b = document.createElement('button');
+        b.className='code syncGlow';
+        b.textContent=item.code; b.dataset.code=item.code;
+        b.addEventListener('click', ()=> handleGuess(item.code, b));
+        codesEl.appendChild(b);
+      });
+    }
+
+    function showCurrent(){
+      const item = state.order[state.idx];
+      promptEl.textContent = item ? item.name : 'All done!';
+      promptEl.classList.remove('ok','bad');
+    }
+
+    function handleGuess(code, btn){
+      const expected = state.order[state.idx]?.code;
+      if(!expected) return;
+      if(code === expected){
+        state.score++; scoreEl.textContent = state.score;
+        showBanner(true);
+        promptEl.classList.remove('bad'); promptEl.classList.add('ok');
+        const chip = qs(`button.code[data-code="${code}"]`);
+        if(chip){ chip.disabled = true; }
+        setTimeout(()=>{
+          state.idx++;
+          if(state.idx < state.order.length){ showCurrent(); hideBannerSoon(); }
+          else { showBanner(true, 'COMPLETED'); promptEl.textContent='All done!'; }
+        }, 520);
+      } else {
+        showBanner(false);
+        promptEl.classList.remove('ok'); promptEl.classList.add('bad');
+        if(btn){ btn.classList.add('wrong'); setTimeout(()=>btn.classList.remove('wrong'), 360); }
+      }
+    }
+
+    function showBanner(ok, text){
+      bigStatus.textContent = text || (ok ? 'CORRECT' : 'INCORRECT');
+      bigStatus.className = 'big-status ' + (ok ? 'ok' : 'bad');
+    }
+    function hideBannerSoon(){
+      setTimeout(()=>{ bigStatus.textContent=''; bigStatus.className='big-status'; }, 700);
+    }
+
+    // Controls
+    qs('#reset').addEventListener('click', reset);
+    document.addEventListener('keydown', (e)=>{ if(e.key.toLowerCase()==='r') reset(); });
+
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', reset); else reset();
+  })();
+  </script>
+</body>
+</html>
